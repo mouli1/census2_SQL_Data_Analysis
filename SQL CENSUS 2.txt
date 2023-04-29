@@ -1,0 +1,40 @@
+select * from data3;
+select * from data4;
+
+/*males and females in one table*/
+select d.state,sum(d.males) total_males,sum(d.females) total_females from
+(select c.district,c.state,c.population/(c.sex_ratio+1) males,
+(c.population*c.sex_ratio)/(c.sex_ratio+1) females from
+(select a.district,a.state, b.sex_ratio/1000 sex_ratio, a.population from data3 a JOIN data4 b 
+on a.district= b.district)c) d group by d.state;
+
+/*literacy rate by sates*/
+select c.state, sum(literates) total_literates from
+(select d.district,d.state,(d.literacy_ratio*d.population) literates from
+(select a.district,a.state,a.population, b.literacy literacy_ratio from data4 b JOIN data3 a 
+ON b.district = a.district)d) c group by c.state; 
+
+/*population in previous census*/
+select d.state,sum(d.prev_pop) total_prev_pop,sum(d.curr_pop) total_curr_pop from
+(select c.state,c.district,(c.population/1+c.growth) prev_pop, 
+c.population curr_pop from
+(select a.state, a.population,a.district,b.growth from 
+data3 a JOIN data4 b ON a.district=b.district)c)d group by d.state;
+
+/*total population of india*/
+select sum(m.total_prev_pop) total_prev_pop,sum(m.total_curr_pop)total_curr_pop from
+(select d.state,sum(d.prev_pop) total_prev_pop,sum(d.curr_pop) total_curr_pop from
+(select c.state,c.district,(c.population/1+c.growth) prev_pop, 
+c.population curr_pop from
+(select a.state, a.population,a.district,b.growth from 
+data3 a JOIN data4 b ON a.district=b.district)c)d group by d.state)m;
+
+/*popoulation versus area*/
+select sum(m.total_prev_pop) total_prev_pop,sum(m.total_curr_pop)total_curr_pop from
+(select d.state,sum(d.prev_pop) total_prev_pop,sum(d.curr_pop) total_curr_pop from
+(select c.state,c.district,(c.population/1+c.growth) prev_pop, 
+c.population curr_pop from
+(select a.state, a.population,a.district,b.growth from 
+data3 a JOIN data4 b ON a.district=b.district)c)d group by d.state)m;
+
+select sum(area_km2) area_km2 from data3;
